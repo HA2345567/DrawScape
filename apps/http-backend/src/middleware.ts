@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { JWT_SECRET } from "./config";
+
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { JWT_SECRET } from "../../../packages/backend-common/src";
 
 
 type AuthenticatedRequest = Request &{ userId?: string | number};
