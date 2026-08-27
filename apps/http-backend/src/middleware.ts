@@ -4,7 +4,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import {JWT_SECRET} from "@repo/backend-common"
 
 
-type AuthenticatedRequest = Request &{ userId?: string | number};
+export type AuthenticatedRequest = Request & { userId?: string | number };
 export const middleware =(
     req:AuthenticatedRequest,
     res: Response,

@@ -12,3 +12,7 @@ export const SigninSchema= z.object({
     password:z.string()
 })
 
+export const CreateRoomSchema = z.object({
+    roomName:z.string().min(3).max(20)
+})
+

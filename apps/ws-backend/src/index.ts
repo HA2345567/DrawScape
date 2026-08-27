@@ -1,5 +1,5 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { JWT_SECRET } from "../../../packages/backend-common/src";
+import { JWT_SECRET } from "@repo/backend-common";
 import jwt, {  JwtPayload } from "jsonwebtoken";
 import { parse } from "node:path";
 
