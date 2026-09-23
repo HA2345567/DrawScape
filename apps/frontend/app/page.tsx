@@ -16,126 +16,133 @@ export default function DrawscapeLandingPage() {
     <div className="min-h-screen bg-white text-[#0d253d] flex flex-col font-sans selection:bg-[#533afd]/15 selection:text-[#533afd] relative">
       
       {/* ========================================================================= */}
-      {/* 1. ATMOSPHERIC GRADIENT MESH BACKDROP (Hero Depth Layer)                 */}
+      {/* 1. HEADER & HERO SECTION WITH ARTWORK BACKGROUND                          */}
       {/* ========================================================================= */}
-      <div className="gradient-mesh-bg h-[780px] sm:h-[840px] pointer-events-none">
-        <div className="mesh-blob-1" />
-        <div className="mesh-blob-2" />
-        <div className="mesh-blob-3" />
-        <div className="mesh-blob-4" />
-      </div>
+      <div className="relative overflow-hidden bg-[#0d253d]">
+        {/* Background Image Layer */}
+        <div
+          className="absolute inset-0 bg-cover bg-top sm:bg-center bg-no-repeat pointer-events-none"
+          style={{ backgroundImage: `url('/hero-bg.png')` }}
+        />
 
-      {/* ========================================================================= */}
-      {/* 2. TOP NAVIGATION BAR (Floating on Mesh)                                  */}
-      {/* ========================================================================= */}
-      <header className="relative z-50 w-full border-b border-[#0d253d]/5 backdrop-blur-md bg-white/75 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          
-          {/* Brand Logo */}
-          <div className="flex items-center gap-8">
-            <Logo size="md" />
+        {/* Sophisticated Ambient Overlay for Readability & Depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#071322]/45 via-[#07172b]/30 to-[#071529]/75 pointer-events-none" />
 
-            {/* Nav Links */}
-            <nav className="hidden md:flex items-center gap-6 text-[14px] font-normal text-[#273951]">
-              <a href="#features" className="hover:text-[#533afd] transition-colors">Features</a>
-              <a href="#use-cases" className="hover:text-[#533afd] transition-colors">Use Cases</a>
-              <a href="#ai-engine" className="hover:text-[#533afd] transition-colors flex items-center gap-1.5">
-                <span>AI Engine</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider bg-[#b9b9f9]/40 text-[#4434d4] px-1.5 py-0.5 rounded-full">New</span>
+        {/* ======================================================================= */}
+        {/* 2. TOP NAVIGATION BAR (Floating with Glassmorphism)                     */}
+        {/* ======================================================================= */}
+        <header className="relative z-50 w-full border-b border-white/15 backdrop-blur-md bg-white/10 transition-all">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+            
+            {/* Brand Logo */}
+            <div className="flex items-center gap-8">
+              <Logo size="md" theme="dark" />
+
+              {/* Nav Links */}
+              <nav className="hidden md:flex items-center gap-6 text-[14px] font-normal text-white/90">
+                <a href="#features" className="hover:text-white transition-colors">Features</a>
+                <a href="#use-cases" className="hover:text-white transition-colors">Use Cases</a>
+                <a href="#ai-engine" className="hover:text-white transition-colors">AI Engine</a>
+                <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+              </nav>
+            </div>
+
+            {/* Right Actions: Single Filled Primary Pill */}
+            <div className="flex items-center gap-4">
+              <Link
+                href="/signin"
+                className="text-[14px] font-medium text-white/90 hover:text-white transition-colors px-2 py-1"
+              >
+                Sign In
+              </Link>
+
+              <Link
+                href="/signup"
+                className="bg-[#533afd] hover:bg-[#4434d4] active:bg-[#2e2b8c] text-white text-[14px] font-medium px-4 py-2 rounded-full shadow-lg shadow-indigo-950/40 border border-white/20 transition-all flex items-center gap-1.5"
+              >
+                <span>Start drawing</span>
+                <span className="text-xs">→</span>
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        {/* ======================================================================= */}
+        {/* 3. HERO SECTION                                                         */}
+        {/* ======================================================================= */}
+        <section className="relative z-10 pt-16 pb-20 sm:pt-20 sm:pb-28">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            
+            {/* Subdued Tag Pill */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-[12px] font-medium mb-8 backdrop-blur-md shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse" />
+              <span>Drawscape 2.0 Enterprise Engine</span>
+              <span className="text-amber-200 font-semibold ml-1">Explore features →</span>
+            </div>
+
+            {/* Display Headline */}
+            <h1 className="text-[28px] sm:text-[40px] lg:text-[54px] font-light text-white tracking-tight leading-[1.2] mb-4 max-w-3xl mx-auto drop-shadow-[0_2px_14px_rgba(0,0,0,0.5)]">
+              Think freely, draw anything,<br className="hidden sm:inline" /> and make ideas come alive.
+            </h1>
+
+            {/* Lead Body Description */}
+            <p className="text-[16px] sm:text-[18px] font-light text-white/90 max-w-xl mx-auto leading-relaxed mb-8 drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
+              Fast, collaborative architecture diagramming with a signature hand-drawn feel.
+            </p>
+
+            {/* Single-Indigo CTA Group */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-12">
+              <Link
+                href="/signup"
+                className="w-full sm:w-auto bg-[#533afd] hover:bg-[#4434d4] active:bg-[#2e2b8c] text-white text-[15px] font-medium px-6 py-2.5 rounded-full shadow-xl shadow-indigo-950/50 border border-white/20 transition-all flex items-center justify-center gap-2"
+              >
+                <span>Start drawing free</span>
+                <span>→</span>
+              </Link>
+
+              <a
+                href="#product-preview"
+                className="w-full sm:w-auto bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md text-[15px] font-medium px-6 py-2.5 rounded-full transition-all flex items-center justify-center gap-2"
+              >
+                <span>Watch product demo</span>
               </a>
-              <a href="#faq" className="hover:text-[#533afd] transition-colors">FAQ</a>
-            </nav>
-          </div>
-
-          {/* Right Actions: Single Filled Primary Pill */}
-          <div className="flex items-center gap-4">
-            <Link
-              href="/signin"
-              className="text-[14px] font-medium text-[#273951] hover:text-[#0d253d] transition-colors px-2 py-1"
-            >
-              Sign In
-            </Link>
-
-            <Link
-              href="/signup"
-              className="bg-[#533afd] hover:bg-[#4434d4] active:bg-[#2e2b8c] text-white text-[14px] font-medium px-4 py-2 rounded-full shadow-stripe-1 transition-all flex items-center gap-1.5"
-            >
-              <span>Start drawing</span>
-              <span className="text-xs">→</span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* ========================================================================= */}
-      {/* 3. HERO SECTION (Editorial Typography over Atmospheric Wash)              */}
-      {/* ========================================================================= */}
-      <section className="relative z-10 pt-16 pb-20 sm:pt-20 sm:pb-28">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          
-          {/* Subdued Tag Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#b9b9f9]/30 border border-[#533afd]/20 text-[#4434d4] text-[12px] font-medium mb-8 backdrop-blur-xs">
-            <span className="w-2 h-2 rounded-full bg-[#533afd]" />
-            <span>Drawscape 2.0 Enterprise Engine</span>
-            <span className="text-[#533afd] font-semibold ml-1">Explore features →</span>
-          </div>
-
-          {/* Display Headline */}
-          <h1 className="text-[26px] sm:text-[34px] lg:text-[50px] font-light text-[#0d253d] tracking-tight leading-[1.22] mb-4 max-w-2xl mx-auto">
-            Think freely, draw anything,<br className="hidden sm:inline" /> and make ideas come alive.
-          </h1>
-
-          {/* Lead Body Description */}
-          <p className="text-[15px] sm:text-[16px] font-light text-[#64748d] max-w-lg mx-auto leading-relaxed mb-8">
-            Fast, collaborative architecture diagramming with a signature hand-drawn feel.
-          </p>
-
-          {/* Single-Indigo CTA Group */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-12">
-            <Link
-              href="/signup"
-              className="w-full sm:w-auto bg-[#533afd] hover:bg-[#4434d4] active:bg-[#2e2b8c] text-white text-[15px] font-medium px-6 py-2.5 rounded-full shadow-stripe-2 transition-all flex items-center justify-center gap-2"
-            >
-              <span>Start drawing free</span>
-              <span>→</span>
-            </Link>
-
-            <a
-              href="#product-preview"
-              className="w-full sm:w-auto bg-white hover:bg-[#f6f9fc] text-[#533afd] border border-[#533afd]/40 text-[15px] font-medium px-6 py-2.5 rounded-full transition-all flex items-center justify-center gap-2"
-            >
-              <span>Watch product demo</span>
-            </a>
-          </div>
-
-          {/* Quiet Metric Indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-[13px] text-[#64748d] font-normal">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#533afd] font-semibold">✓</span>
-              <span>Open-Source Core</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#533afd] font-semibold">✓</span>
-              <span>End-to-End Encrypted</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#533afd] font-semibold">✓</span>
-              <span>Zero Session Logging</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#533afd] font-semibold">✓</span>
-              <span className="tnum">100k+ Engineers</span>
+
+            {/* Quiet Metric Indicators */}
+            <div className="flex flex-wrap items-center justify-center gap-6 text-[13px] text-white/85 font-medium">
+              <div className="flex items-center gap-1.5">
+                <span className="text-amber-300 font-bold">✓</span>
+                <span>Open-Source Core</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-amber-300 font-bold">✓</span>
+                <span>End-to-End Encrypted</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-amber-300 font-bold">✓</span>
+                <span>Zero Session Logging</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-amber-300 font-bold">✓</span>
+                <span className="tnum">100k+ Engineers</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* ======================================================================= */}
-        {/* 4. HERO VIDEO CONTAINER (Empty Box for Future Video)                    */}
-        {/* ======================================================================= */}
-        <div id="product-preview" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-14">
-          <div className="relative rounded-2xl border border-[#e3e8ee] bg-[#0d253d] shadow-stripe-3 aspect-video w-full overflow-hidden" />
-        </div>
-      </section>
+          {/* ===================================================================== */}
+          {/* 4. HERO VIDEO / WORKSPACE CONTAINER                                   */}
+          {/* ===================================================================== */}
+          <div id="product-preview" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-14">
+            <div className="relative rounded-2xl border border-white/20 bg-[#0d253d]/80 shadow-2xl backdrop-blur-sm aspect-video w-full overflow-hidden group">
+              <img
+                src="/canvas-preview.png"
+                alt="Drawscape Canvas Preview"
+                className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.01]"
+              />
+            </div>
+          </div>
+        </section>
+      </div>
 
       {/* ========================================================================= */}
       {/* 5. TRUSTED BY SECTION (Subtle Logo Strip)                                 */}
@@ -544,30 +551,53 @@ export default function DrawscapeLandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 11. BOTTOM ATMOSPHERIC CTA BANNER                                         */}
+      {/* 11. BOTTOM ATMOSPHERIC CTA BANNER (Nocturnal Celestial Masterpiece)       */}
       {/* ========================================================================= */}
-      <section className="py-24 bg-[#0d253d] text-white relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#533afd]/20 blur-[120px] pointer-events-none" />
+      <section className="relative py-28 sm:py-36 bg-[#040812] text-white overflow-hidden isolate border-t border-white/10">
         
+        {/* Background Image: Nocturnal Celestial Variation generated from Hero artwork */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
+          style={{ backgroundImage: `url('/cta-bg.jpg')` }}
+        />
+
+        {/* Shady Atmospheric Moody Vignette & Depth Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#040812]/75 via-[#040812]/35 to-[#040812]/85 pointer-events-none" />
+        <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.85)] pointer-events-none" />
+
+        {/* Top Edge Glowing Beam */}
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#533afd]/80 via-amber-300/40 to-transparent pointer-events-none" />
+
+        {/* Subtle Film Grain Noise Texture */}
+        <div
+          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: "repeat",
+          }}
+        />
+
+        {/* Central Soft Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#533afd]/20 rounded-full blur-[140px] pointer-events-none" />
+
+        {/* Foreground Content */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <span className="text-[12px] font-semibold uppercase tracking-wider text-[#b9b9f9] bg-[#533afd]/30 px-3 py-1 rounded-full mb-6 inline-block">
-            Immediate Access
-          </span>
-          
-          <h2 className="text-[40px] sm:text-[56px] font-light tracking-display-xxl leading-[1.08] mb-6">
+
+          <h2 className="text-[38px] sm:text-[54px] lg:text-[62px] font-light tracking-display-xxl leading-[1.08] mb-6 text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
             Ready to structure your system architecture?
           </h2>
           
-          <p className="max-w-xl mx-auto text-[16px] text-white/70 font-light mb-10">
+          <p className="max-w-xl mx-auto text-[16px] sm:text-[18px] text-white/85 font-light mb-10 leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
             Join engineers, software architects, and tech leaders building on Drawscape every day.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="w-full sm:w-auto bg-[#533afd] hover:bg-[#4434d4] text-white text-[15px] font-medium px-8 py-3 rounded-full shadow-stripe-2 transition-all"
+              className="w-full sm:w-auto bg-[#533afd] hover:bg-[#4434d4] text-white text-[15px] font-medium px-9 py-3.5 rounded-full shadow-[0_0_35px_rgba(83,58,253,0.5)] border border-white/25 hover:scale-[1.02] active:scale-[0.99] transition-all flex items-center justify-center gap-2 backdrop-blur-sm"
             >
-              Start Drawing Now (Free) →
+              <span>Start Drawing Now (Free)</span>
+              <span>→</span>
             </Link>
           </div>
         </div>

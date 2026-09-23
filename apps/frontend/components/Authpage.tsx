@@ -1,24 +1,93 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Logo } from "./Logo";
+import { HTTP_BACKEND } from "@/config";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || HTTP_BACKEND || "http://localhost:3001";
 
 export function AuthPage({ isSignin }: { isSignin: boolean }) {
+  const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if redirected from Google OAuth callback with a token or error
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error");
+    const token = params.get("token");
+    if (authError) {
+      setError(decodeURIComponent(authError));
+    } else if (token) {
+      localStorage.setItem("token", token);
+      router.push("/canvas");
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
 
-    // Backend submission placeholder
-    console.log({ email, password });
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    try {
+      const endpoint = isSignin ? `${BACKEND_URL}/api/v1/signin` : `${BACKEND_URL}/api/v1/signup`;
+      const payload = isSignin
+        ? { username: email, password }
+        : { username: email, password, name: name.trim() || email.split("@")[0] };
 
-    setLoading(false);
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      // If signing up and user already exists, try signing in automatically
+      if (!isSignin && res.status === 409) {
+        const signinRes = await fetch(`${BACKEND_URL}/api/v1/signin`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: email, password }),
+        });
+        const signinData = await signinRes.json();
+        if (signinData.token) {
+          localStorage.setItem("token", signinData.token);
+          router.push("/canvas");
+          return;
+        }
+        // Wrong password for existing account
+        setError("An account with this email already exists. Please sign in instead.");
+        setLoading(false);
+        return;
+      }
+
+      if (!res.ok) {
+        setError(data.message || "Authentication failed. Please check your credentials.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        router.push("/canvas");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Cannot connect to server. Please ensure the backend is running.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = () => {
+    window.location.href = `${BACKEND_URL}/api/v1/auth/google`;
   };
 
   return (
@@ -104,6 +173,7 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
               {/* Google Button */}
               <button
                 type="button"
+                onClick={handleGoogleAuth}
                 className="flex items-center justify-center gap-2 rounded-full border border-[#e3e8ee] bg-white px-3.5 py-2 text-xs font-medium text-[#0d253d] shadow-stripe-1 hover:bg-[#f6f9fc] transition-all cursor-pointer"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -150,8 +220,35 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
               </span>
             </div>
 
+            {error && (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-600 font-medium">
+                {error}
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-3.5">
+              
+              {/* Full Name (Signup only) */}
+              {!isSignin && (
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-xs font-medium text-[#273951] mb-1"
+                  >
+                    Full Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Alex Morgan"
+                    required
+                    className="w-full rounded-xl border border-[#e3e8ee] bg-white px-3.5 py-2 text-sm text-[#0d253d] placeholder:text-[#64748d]/60 outline-none transition-all focus:border-[#533afd] focus:ring-4 focus:ring-[#533afd]/10"
+                  />
+                </div>
+              )}
               
               {/* Email */}
               <div>

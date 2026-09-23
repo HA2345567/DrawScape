@@ -8,11 +8,13 @@
     "start": "bun dist/index.js",
     "dev": "bun --watch src/index.ts"
   },
-  
   "devDependencies": {
     "@repo/typescript-config": "*",
     "@types/bun": "latest",
-    "@types/node": "^26.3.0"
+    "@types/cors": "^2.8.19",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.3.0",
+    "cors": "^2.8.6"
   },
   "peerDependencies": {
     "typescript": "^7.0.2"
@@ -22,8 +24,9 @@
     "@repo/common": "*",
     "@repo/db": "*",
     "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
+    "dotenv": "^16.4.7",
     "express": "^5.2.1",
+    "google-auth-library": "^11.1.0",
     "jsonwebtoken": "^9.0.3"
   }
 }

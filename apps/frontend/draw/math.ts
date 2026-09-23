@@ -49,6 +49,19 @@ export function getElementBounds(element: CanvasElement): { minX: number; minY: 
     return { minX, minY, maxX, maxY };
   }
 
+  if (element.type === "text") {
+    const lines = (element.text || "").split("\n");
+    const fontSize = element.fontSize || 20;
+    const lineHeight = fontSize * 1.25;
+    const height = lines.length * lineHeight;
+    let maxLineLen = 0;
+    lines.forEach((l) => {
+      if (l.length > maxLineLen) maxLineLen = l.length;
+    });
+    const width = element.width || Math.max(maxLineLen * (fontSize * 0.6), 24);
+    return { minX: element.x, minY: element.y, maxX: element.x + width, maxY: element.y + height };
+  }
+
   const minX = Math.min(element.x, element.x + element.width);
   const maxX = Math.max(element.x, element.x + element.width);
   const minY = Math.min(element.y, element.y + element.height);

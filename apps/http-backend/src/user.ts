@@ -11,62 +11,65 @@ const userRouter = Router();
 userRouter.post("/signup", async(req,res)=>{
     const parseData = CreateUserSchema.safeParse(req.body);
     if(!parseData.success){
-        res.json({
-            message: "incorrect inputs"
-        })
+        res.status(400).json({
+            message: "incorrect inputs",
+            errors: parseData.error.issues
+        });
         return;
     }
 
     try{
         const user = await prisma.user.create({
             data:{
-                email: parseData.data?.username,
+                email: parseData.data.username,
                 password: parseData.data.password,
                 name: parseData.data.name,
-
             }
-        })
+        });
+        const token = jwt.sign({
+            userId: user.id
+        }, JWT_SECRET);
         res.json({
-            userId:user.id
-        })
+            userId: user.id,
+            token
+        });
     }catch(e){
-        res.status(411).json({
-            message:"user already exists"
-        })
-
+        res.status(409).json({
+            message: "user already exists"
+        });
     }
-    
 });
 
 userRouter.post("/signin", async(req,res)=>{
    try{
     const data = SigninSchema.safeParse(req.body);
     if(!data.success){
-        res.json({
+        res.status(400).json({
             message:"Incorrect inputs"
-        })
+        });
         return;
     }
     const {username, password} = data.data;
-    const user= await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
         where:{
-            email:username,
+            email: username,
         }
-    })
+    });
     if(!user || user.password !== password){
-        res.json({
-            message:"User not found"
-        })
+        res.status(401).json({
+            message: "Invalid credentials"
+        });
         return;
     }
     const userId = user.id;
     const token = jwt.sign({
         userId
-    },JWT_SECRET);
+    }, JWT_SECRET);
     res.json({
         token
-    })
+    });
    }catch(e){
+    console.error("Signin error:", e);
     res.status(500).json({
         message:"Internal Server error"
     });
@@ -99,28 +102,34 @@ userRouter.post("/room", middleware, async(req: AuthenticatedRequest, res: Respo
     }
 });
 
-userRouter.get("/chats/:roomId",async(req, res)=>{
-    const roomId = Number(req.params.roomId);
+userRouter.get("/chats/:roomId", async (req, res) => {
+    const param = req.params.roomId;
+    let numericRoomId = Number(param);
 
-    if(Number.isNaN(roomId)){
-        res.status(400).json({
-            message:"Invalid room Id"
+    if (Number.isNaN(numericRoomId)) {
+        const room = await prisma.room.findFirst({
+            where: { slug: param },
         });
-        return;
+        if (!room) {
+            res.json({ messages: [] });
+            return;
+        }
+        numericRoomId = room.id;
     }
+
     const messages = await prisma.chat.findMany({
-        where:{
-            roomId:roomId
+        where: {
+            roomId: numericRoomId,
         },
-        orderBy:{
-            id:"desc"
+        orderBy: {
+            id: "desc",
         },
-        take:50
+        take: 50,
     });
     res.json({
-        messages
+        messages,
     });
-})
+});
 
 userRouter.get("/room/:slug", async(req,res)=>{
     const slug = req.params.slug;

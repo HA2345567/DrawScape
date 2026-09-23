@@ -6,7 +6,8 @@ export function renderElement(ctx: CanvasRenderingContext2D, element: CanvasElem
 
   ctx.save();
   ctx.globalAlpha = element.opacity ?? 1;
-  ctx.strokeStyle = element.strokeColor || "#ffffff";
+  const stroke = (!element.strokeColor || element.strokeColor === "#ffffff" || element.strokeColor === "#e0e0e0") ? "#A3A3A3" : element.strokeColor;
+  ctx.strokeStyle = stroke;
   ctx.fillStyle = element.backgroundColor || "transparent";
   ctx.lineWidth = element.strokeWidth || 2;
   ctx.lineCap = "round";
@@ -26,11 +27,24 @@ export function renderElement(ctx: CanvasRenderingContext2D, element: CanvasElem
       const minY = Math.min(element.y, element.y + element.height);
       const width = Math.abs(element.width);
       const height = Math.abs(element.height);
+      const radius = Math.min(element.borderRadius ?? 12, width / 2, height / 2);
+
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(minX, minY, width, height, radius);
+      } else {
+        ctx.moveTo(minX + radius, minY);
+        ctx.arcTo(minX + width, minY, minX + width, minY + height, radius);
+        ctx.arcTo(minX + width, minY + height, minX, minY + height, radius);
+        ctx.arcTo(minX, minY + height, minX, minY, radius);
+        ctx.arcTo(minX, minY, minX + width, minY, radius);
+        ctx.closePath();
+      }
 
       if (element.backgroundColor && element.backgroundColor !== "transparent") {
-        ctx.fillRect(minX, minY, width, height);
+        ctx.fill();
       }
-      ctx.strokeRect(minX, minY, width, height);
+      ctx.stroke();
       break;
     }
 
@@ -42,11 +56,18 @@ export function renderElement(ctx: CanvasRenderingContext2D, element: CanvasElem
       const midX = minX + width / 2;
       const midY = minY + height / 2;
 
+      const top = { x: midX, y: minY };
+      const right = { x: minX + width, y: midY };
+      const bottom = { x: midX, y: minY + height };
+      const left = { x: minX, y: midY };
+      const radius = Math.min(12, width / 4, height / 4);
+
       ctx.beginPath();
-      ctx.moveTo(midX, minY);
-      ctx.lineTo(minX + width, midY);
-      ctx.lineTo(midX, minY + height);
-      ctx.lineTo(minX, midY);
+      ctx.moveTo((left.x + top.x) / 2, (left.y + top.y) / 2);
+      ctx.arcTo(top.x, top.y, right.x, right.y, radius);
+      ctx.arcTo(right.x, right.y, bottom.x, bottom.y, radius);
+      ctx.arcTo(bottom.x, bottom.y, left.x, left.y, radius);
+      ctx.arcTo(left.x, left.y, top.x, top.y, radius);
       ctx.closePath();
 
       if (element.backgroundColor && element.backgroundColor !== "transparent") {
@@ -136,7 +157,7 @@ export function renderElement(ctx: CanvasRenderingContext2D, element: CanvasElem
 
     case "text": {
       ctx.font = `${element.fontSize || 20}px ${element.fontFamily || "sans-serif"}`;
-      ctx.fillStyle = element.strokeColor || "#ffffff";
+      ctx.fillStyle = stroke;
       ctx.textBaseline = "top";
       const lines = (element.text || "").split("\n");
       const lineHeight = (element.fontSize || 20) * 1.25;
@@ -147,8 +168,12 @@ export function renderElement(ctx: CanvasRenderingContext2D, element: CanvasElem
     }
 
     case "image": {
-      if (element.image && element.image.complete) {
+      if (element.image && element.image.complete && element.image.naturalWidth !== 0) {
         ctx.drawImage(element.image, element.x, element.y, element.width, element.height);
+      } else if (element.src && !element.image) {
+        const img = new Image();
+        img.src = element.src;
+        element.image = img;
       }
       break;
     }

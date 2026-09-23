@@ -1,6 +1,6 @@
-import React from "react";
-import CanvasLayout from "@/components/CanvasLayout";
+import { redirect } from "next/navigation";
 
 export default function CanvasPage() {
-  return <CanvasLayout />;
+  const uniqueId = Math.random().toString(36).substring(2, 10);
+  redirect(`/canvas/${uniqueId}`);
 }
