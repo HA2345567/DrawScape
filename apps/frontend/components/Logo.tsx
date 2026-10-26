@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface LogoProps {
@@ -11,7 +12,7 @@ interface LogoProps {
 
 export function LogoIcon({ size = 32, className = "" }: { size?: number; className?: string }) {
   return (
-    <img
+    <Image
       src="/logo.png"
       alt="Drawscape Logo"
       width={size}

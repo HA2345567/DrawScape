@@ -1,2 +1,1 @@
-
-export {JWT_SECRET} from "./index.js"
+export { getJwtSecret } from "./index.js";

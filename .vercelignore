@@ -1,0 +1,12 @@
+.env*
+**/.env*
+node_modules
+**/node_modules
+.git
+.turbo
+**/.turbo
+**/.next
+**/dist
+**/src/generated
+scripts
+tests

@@ -172,6 +172,7 @@ export function renderElement(ctx: CanvasRenderingContext2D, element: CanvasElem
         ctx.drawImage(element.image, element.x, element.y, element.width, element.height);
       } else if (element.src && !element.image) {
         const img = new Image();
+        img.onload = () => window.dispatchEvent(new Event("drawscape:image-loaded"));
         img.src = element.src;
         element.image = img;
       }

@@ -1,6 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
-
-export default function CanvasPage() {
-  const uniqueId = Math.random().toString(36).substring(2, 10);
-  redirect(`/canvas/${uniqueId}`);
-}
+export const dynamic = "force-dynamic";
+export default function CanvasPage() { redirect("/canvas/" + randomUUID()); }

@@ -1,37 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-
-import jwt, { JwtPayload } from "jsonwebtoken";
-import {JWT_SECRET} from "@repo/backend-common"
-
-
-export type AuthenticatedRequest = Request & { userId?: string | number };
-export const middleware =(
-    req:AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-)=>{
-    try{
-        const authHeader = req.headers["authorization"]??"";
-        const token = authHeader.startsWith("Bearer")
-        ? authHeader.slice(7)
-        : authHeader;
-
-
-        const decoded = jwt.verify(token,JWT_SECRET);
-        if(typeof decoded === "string"){
-            return res.status(403).json({
-                message:"unauthorized",
-            })
-        }
-
-        req.userId = (decoded as JwtPayload).userId as string | number;
-        return next();
-
-
-    }catch(e){
-        return res.status(403).json({
-            message:"unauthorized",
-        })
-    }
-
+import type { NextFunction, Request, Response } from "express";
+import { readToken } from "./security";
+export type AuthenticatedRequest = Request & { userId?: number };
+export function middleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const header = req.headers.authorization || "";
+    req.userId = readToken(header.startsWith("Bearer ") ? header.slice(7) : header);
+    next();
+  } catch {
+    res.status(401).json({ message: "Please sign in again." });
+  }
 }

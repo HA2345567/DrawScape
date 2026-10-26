@@ -14,9 +14,10 @@
     "@types/node": "^26.3.0"
   },
   "peerDependencies": {
-    "typescript": "^7.0.2"
+    "typescript": ">=5 <7"
   },
   "dependencies": {
+    "http-backend": "*",
     "@repo/backend-common": "*",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/ws": "^8.18.1",

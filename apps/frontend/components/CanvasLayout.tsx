@@ -23,8 +23,7 @@ import {
 import { CanvasElement, Point, ResizeHandle } from "@/draw/types";
 import { renderElement, renderSelectionBox } from "@/draw/renderer";
 import { isPointInsideElement, getHitResizeHandle } from "@/draw/math";
-import { getExistingShapes } from "@/draw/http";
-import { WS_URL } from "@/config";
+import { useCollaboration, applyShape } from "@/draw/useCollaboration";
 
 export type ToolType =
   | "hand"
@@ -45,7 +44,6 @@ interface CanvasLayoutProps {
 
 export default function CanvasLayout({ roomId }: CanvasLayoutProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Drawing & Canvas Elements State
@@ -152,68 +150,22 @@ export default function CanvasLayout({ roomId }: CanvasLayoutProps) {
   useEffect(() => {
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener("drawscape:image-loaded", handleResize);
+    return () => { window.removeEventListener("resize", handleResize); window.removeEventListener("drawscape:image-loaded", handleResize); };
   }, [handleResize]);
 
   useEffect(() => {
     renderCanvas();
   }, [renderCanvas]);
 
-  // Load existing shapes and connect WebSocket if roomId is provided
-  useEffect(() => {
-    if (!roomId) return;
-
-    getExistingShapes(roomId)
-      .then((shapes) => {
-        if (Array.isArray(shapes) && shapes.length > 0) {
-          const valid = shapes.filter(Boolean);
-          setElements(valid);
-          setHistory([valid]);
-          setHistoryIndex(0);
-        }
-      })
-      .catch(console.error);
-
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (!token) return;
-
-    try {
-      const ws = new WebSocket(`${WS_URL}?token=${token}`);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ type: "join_room", roomId }));
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === "chat" && data.message) {
-            const messageData = JSON.parse(data.message);
-            if (messageData.shape) {
-              setElements((prev) => {
-                const existingIndex = prev.findIndex((s) => s.id === messageData.shape.id);
-                if (existingIndex >= 0) {
-                  const updated = [...prev];
-                  updated[existingIndex] = messageData.shape;
-                  return updated;
-                }
-                return [...prev, messageData.shape];
-              });
-            }
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      };
-
-      return () => {
-        ws.close();
-      };
-    } catch (err) {
-      console.error("WS error:", err);
-    }
-  }, [roomId]);
+  const onInitial = useCallback((loaded: CanvasElement[]) => {
+    setHistory([loaded]);
+    setHistoryIndex(0);
+  }, []);
+  const onRemote = useCallback((shape: CanvasElement) => {
+    setHistory(previous => previous.map(snapshot => applyShape(snapshot, shape)));
+  }, []);
+  const { ready, status } = useCollaboration(roomId, elements, setElements, onInitial, onRemote);
 
   // Undo / Redo handlers
   const handleUndo = useCallback(() => {
@@ -295,21 +247,13 @@ export default function CanvasLayout({ roomId }: CanvasLayoutProps) {
       setHistory((prev) => [...prev.slice(0, historyIndex + 1), newElements]);
       setHistoryIndex((prev) => prev + 1);
 
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && roomId) {
-        wsRef.current.send(
-          JSON.stringify({
-            type: "chat",
-            roomId,
-            message: JSON.stringify({ shape: textEl }),
-          })
-        );
-      }
+
 
       setTextEditing(null);
       setActiveTool("selection");
       setSelectedId(newId);
     },
-    [elements, historyIndex, roomId]
+    [elements, historyIndex]
   );
 
   // Add uploaded image to canvas
@@ -346,27 +290,19 @@ export default function CanvasLayout({ roomId }: CanvasLayoutProps) {
         setHistory((prev) => [...prev.slice(0, historyIndex + 1), newElements]);
         setHistoryIndex((prev) => prev + 1);
 
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && roomId) {
-          wsRef.current.send(
-            JSON.stringify({
-              type: "chat",
-              roomId,
-              message: JSON.stringify({ shape: imageEl }),
-            })
-          );
-        }
+
 
         setActiveTool("selection");
         setSelectedId(newId);
       };
     },
-    [elements, historyIndex, roomId, toWorldPoint]
+    [elements, historyIndex, toWorldPoint]
   );
 
   // File input change handler
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || file.size > 1400000 || !/^image\/(png|jpeg|webp|gif)$/.test(file.type)) { alert("Choose a PNG, JPEG, WebP, or GIF smaller than 1.4 MB."); return; }
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result;
@@ -386,7 +322,7 @@ export default function CanvasLayout({ roomId }: CanvasLayoutProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
+    if (file && file.size <= 1400000 && /^image\/(png|jpeg|webp|gif)$/.test(file.type)) {
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result;
@@ -776,18 +712,7 @@ export default function CanvasLayout({ roomId }: CanvasLayoutProps) {
       setHistory((prev) => [...prev.slice(0, historyIndex + 1), elements]);
       setHistoryIndex((prev) => prev + 1);
 
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && roomId && selectedId) {
-        const updated = elements.find((el) => el.id === selectedId);
-        if (updated) {
-          wsRef.current.send(
-            JSON.stringify({
-              type: "chat",
-              roomId,
-              message: JSON.stringify({ shape: updated }),
-            })
-          );
-        }
-      }
+
       return;
     }
 
@@ -799,15 +724,7 @@ export default function CanvasLayout({ roomId }: CanvasLayoutProps) {
       setHistory((prev) => [...prev.slice(0, historyIndex + 1), newElements]);
       setHistoryIndex((prev) => prev + 1);
 
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && roomId) {
-        wsRef.current.send(
-          JSON.stringify({
-            type: "chat",
-            roomId,
-            message: JSON.stringify({ shape: currentElement }),
-          })
-        );
-      }
+
 
       setCurrentElement(null);
       setActiveTool("selection");
@@ -845,11 +762,13 @@ export default function CanvasLayout({ roomId }: CanvasLayoutProps) {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none bg-[#121212] font-sans">
+      <div aria-live="polite" className="absolute bottom-4 left-4 z-40 max-w-sm rounded-lg bg-[#232329] px-3 py-2 text-xs text-white">{status}</div>
+      {!ready && <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-[#121212] text-white"><p>{status}</p><button type="button" onClick={() => window.location.reload()} className="rounded-lg border px-4 py-2">Retry</button></div>}
       {/* Hidden File Input for Image Upload */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/png,image/jpeg,image/webp,image/gif"
         onChange={handleImageFileChange}
         className="hidden"
       />

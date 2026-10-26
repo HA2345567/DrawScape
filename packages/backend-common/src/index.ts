@@ -1,6 +1,5 @@
-
-const env = (globalThis as typeof globalThis & {
-	process?: { env?: Record<string, string | undefined> };
-}).process?.env;
-
-export const JWT_SECRET = env?.JWT_SECRET || "2334fdkfjkljfkj";
+export function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) throw new Error("JWT_SECRET must contain at least 32 characters");
+  return secret;
+}

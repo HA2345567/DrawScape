@@ -1,24 +1,9 @@
 import { HTTP_BACKEND } from "@/config";
-import axios from "axios";
-
-export async function getExistingShapes(roomId: string) {
-  try {
-    const res = await axios.get(`${HTTP_BACKEND}/api/v1/chats/${roomId}`);
-    const messages = res.data?.messages || [];
-
-    const shapes = messages
-      .map((x: { message: string }) => {
-        try {
-          const messageData = JSON.parse(x.message);
-          return messageData.shape;
-        } catch {
-          return null;
-        }
-      })
-      .filter(Boolean);
-
-    return shapes;
-  } catch {
-    return [];
-  }
+import type { CanvasElement } from "./types";
+export async function getExistingShapes(roomId: string): Promise<CanvasElement[]> {
+  const token = localStorage.getItem("token");
+  const response = await fetch(HTTP_BACKEND + "/api/v1/chats/" + roomId, { headers: { Authorization: "Bearer " + token } });
+  if (!response.ok) throw new Error("Could not load canvas.");
+  const data = await response.json();
+  return data.messages.map((row: { message: string }) => JSON.parse(row.message).shape).filter((shape: CanvasElement) => !shape.isDeleted);
 }

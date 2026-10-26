@@ -15,7 +15,15 @@ if (!process.env.DATABASE_URL) {
 }
 
 const connectionString = process.env.DATABASE_URL || "";
-const pool = new pg.Pool({ connectionString });
+const pool = new pg.Pool({
+  connectionString,
+  max: 5,
+  connectionTimeoutMillis: 8000,
+  idleTimeoutMillis: 10000,
+  query_timeout: 10000,
+  statement_timeout: 10000,
+  allowExitOnIdle: true,
+});
 const adapter = new PrismaPg(pool);
 
 export const prismaClient = new PrismaClient({ adapter });
